@@ -1,6 +1,6 @@
 'use strict'
 
-const socket = io.connect('http://localhost:3000', {reconnect: true})
+const socket = io.connect('http://idea.selfup.me:3000', {reconnect: true})
 const rb = socket
 
 if (localStorage.getItem("authToken") !== null) {
