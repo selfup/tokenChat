@@ -1,7 +1,7 @@
 'use strict'
 
-const socket = io.connect('http://idea.selfup.me:3000', {reconnect: true})
-const rb = socket
+const socket = io.connect('http://localhost:3000', {reconnect: true})
+const rb     = socket
 
 if (localStorage.getItem("authToken") !== null) {
   let clientInfo = JSON.parse(localStorage.getItem("authToken"))
@@ -14,7 +14,6 @@ if (localStorage.getItem("authToken") !== null) {
     <button class='btn btn-primary' id="login">Login!</button>
     <button class='btn btn-danger' id="logout">Delete Account!</button>`
   )
-
 
   $('#login').on('click', function() {
     rb.send('getTable', clientInfo.user)
@@ -36,7 +35,7 @@ if (localStorage.getItem("authToken") !== null) {
     })
   }
 
-  setTimeout(correctPass(), 500);
+  correctPass()
 }
 
 $('#signup').on('click', function() {
@@ -61,21 +60,22 @@ $('#signup').on('click', function() {
 
 socket.on("foundUser", message => {
   let clientInfo = JSON.parse(localStorage.getItem("authToken"))
-  if (message === 'valid') {
+  console.log(message[1]);
+  if (message[0] === 'valid' && message[1].split('/#')[1] === socket.id) {
     $( "div.authChat" ).toggleClass( "hidden" )
     $(".appendMe").html(
-          `<div class="form-group">
-            <label for="usr">Room Id:</label>
-            <input type="text" class="form-control" id="roomIdField">
-            <label for="usr">Name:</label>
-            <input type="text" class="form-control" id="nameField">
-            <label for="usr">Message:</label>
-            <input type="text" class="form-control" id="messageField">
-          </div>
-          <button class='btn btn-danger' id="dropTable">Delete All Messages</button>
-          <br><br>
-          <div class="dataFromDb"></div>
-          <br><br>`
+      `<div class="form-group">
+        <label for="usr">Room Id:</label>
+        <input type="text" class="form-control" id="roomIdField">
+        <label for="usr">Name:</label>
+        <input type="text" class="form-control" id="nameField">
+        <label for="usr">Message:</label>
+        <input type="text" class="form-control" id="messageField">
+      </div>
+      <button class='btn btn-danger' id="dropTable">Delete All Messages</button>
+      <br><br>
+      <div class="dataFromDb"></div>
+      <br><br>`
     )
     $('#nameField').val(`${clientInfo.user.split('###')[1]}`)
 
@@ -93,8 +93,8 @@ socket.on("foundUser", message => {
 
     const sanitize = (message, name) => {
       if (message.includes("<")) { message = "NO TAGS" }
-      if (name.includes("<")) { name = "NO TAGS" }
-      if (name === "") { name = "anon" }
+      if (name.includes("<"))    { name = "NO TAGS" }
+      if (name === "")           { name = "anon" }
       return [message, name]
     }
 
@@ -109,9 +109,9 @@ socket.on("foundUser", message => {
     }
 
     $('#messageField').bind("enterKey",function(e){
-      let name = `${$('#nameField').val()}`
-      let message = `${$('#messageField').val()}`
-      let roomId = getRoomId()
+      let   name      = `${$('#nameField').val()}`
+      let   message   = `${$('#messageField').val()}`
+      let   roomId    = getRoomId()
       const sanitized = sanitize(message, name)
       newMessages(roomId, sanitized)
       resetAndDisplay()
